@@ -9,17 +9,15 @@ import time
 import subprocess
 import graphviz
 import os
-HTML_TEMPLATE = "/Users/ivanzaplatar/Documents/ktg_summer_2023/call_graph/code2flow/code2flow/callgraph_template.html"
-script_path = os.path.abspath(__file__)
-# Construct the file path relative to the script's directory
-file_path = os.path.join(os.path.dirname(script_path), "callgraph_template.html")
-print("script_path:", file_path)
 from .python import Python
 from .javascript import Javascript
 from .ruby import Ruby
 from .php import PHP
 from .model import (TRUNK_COLOR, LEAF_COLOR, NODE_COLOR, GROUP_TYPE, OWNER_CONST,
                     Edge, Group, Node, Variable, is_installed, flatten)
+SCRIPT_PATH = os.path.abspath(__file__)
+# Construct the file path relative to the script's directory
+HTML_TEMPLATE = os.path.join(os.path.dirname(SCRIPT_PATH), "callgraph_template.html")
 
 VERSION = '2.5.1'
 
