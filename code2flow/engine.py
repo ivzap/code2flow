@@ -10,7 +10,10 @@ import subprocess
 import graphviz
 import os
 HTML_TEMPLATE = "/Users/ivanzaplatar/Documents/ktg_summer_2023/call_graph/code2flow/code2flow/callgraph_template.html"
-
+script_path = os.path.abspath(__file__)
+# Construct the file path relative to the script's directory
+file_path = os.path.join(os.path.dirname(script_path), "callgraph_template.html")
+print("script_path:", file_path)
 from .python import Python
 from .javascript import Javascript
 from .ruby import Ruby
@@ -266,6 +269,7 @@ def write_file(outfile, nodes, edges, groups, hide_legend=False,
         for group in groups:
             content += group.to_dot()
     content += '}\n'
+    print("This is the outfile!", outfile)
     # Write/Generate SVG File From GV File(outfile)
     html = GV_to_SVG_to_html(content)
     outfile.write(html)
