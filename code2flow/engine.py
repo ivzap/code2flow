@@ -277,7 +277,10 @@ def write_file(outfile, nodes, edges, groups, hide_legend=False,
 def GV_to_SVG_to_html(dot_content):
     # Execute the dot command
     graph_svg = graphviz.Source(dot_content)
-    svg_content = graph_svg.pipe(format='svg').decode('utf-8')
+    if sys.platform == 'win32':
+        svg_content = graph_svg.pipe(format='svg').decode('cp1252')
+    else:
+        svg_content = graph_svg.pipe(format='svg').decode('utf-8')
     with open(HTML_TEMPLATE, 'r') as file:
         html = file.read()
         html = html.replace('{ SVG }', svg_content)
