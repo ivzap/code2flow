@@ -20,6 +20,7 @@ setup(
     url=url_base,
     download_url=download_url,
     packages=['code2flow'],
+    package_data={"code2flow":['*.html']},
     python_requires='>=3.6',
     include_package_data=True,
     classifiers=[
