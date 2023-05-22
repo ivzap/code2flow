@@ -18,6 +18,7 @@ from .model import (TRUNK_COLOR, LEAF_COLOR, NODE_COLOR, GROUP_TYPE, OWNER_CONST
 SCRIPT_PATH = os.path.abspath(__file__)
 # Construct the file path relative to the script's directory
 HTML_TEMPLATE = os.path.join(os.path.dirname(SCRIPT_PATH), "callgraph_template.html")
+TRADER_SCRIPT_ID = "Gr8Script"
 
 VERSION = '2.5.1'
 
@@ -245,7 +246,6 @@ def write_file(outfile, nodes, edges, groups, hide_legend=False,
     :param hide_legend bool:
     :rtype: None
     '''
-
     if as_json:
         content = generate_json(nodes, edges)
         outfile.write(content)
@@ -269,9 +269,20 @@ def write_file(outfile, nodes, edges, groups, hide_legend=False,
     content += '}\n'
     print("This is the outfile!", outfile)
     # Write/Generate SVG File From GV File(outfile)
-    html = GV_to_SVG_to_html(content)
+    trader_script = find_trader_script(groups)
+    html = GV_to_SVG_to_html(content).replace("{ SCRIPT_PATH }", trader_script)
     outfile.write(html)
     print("Html file generated successfully")
+
+def find_trader_script(groups):
+    # every group has a file token and class token.
+    # iterate over every files class to find trader file
+    all_groups = flatten(g.all_groups() for g in groups)
+    for i in range(1, len(all_groups), 1):
+        if TRADER_SCRIPT_ID in all_groups[i].token and all_groups[i].group_type == "CLASS":
+            if all_groups[i-1].group_type == "FILE":
+                return all_groups[i-1].token + ".py"
+    raise("Could not find traders script")
 
 
 def GV_to_SVG_to_html(dot_content):
@@ -284,6 +295,8 @@ def GV_to_SVG_to_html(dot_content):
     with open(HTML_TEMPLATE, 'r') as file:
         html = file.read()
         html = html.replace('{ SVG }', svg_content)
+        # replace { SCRIPT_PATH } with the path to trader script
+
     return html
 
 
@@ -733,7 +746,7 @@ def code2flow(raw_source_paths, output_file, language=None, hide_legend=True,
     logging.basicConfig(format="Code2Flow: %(message)s", level=level)
 
     sources, language = get_sources_and_language(raw_source_paths, language)
-
+    
     output_ext = None
     if isinstance(output_file, str):
         assert '.' in output_file, "Output filename must end in one of: %r." % set(VALID_EXTENSIONS)
@@ -765,7 +778,6 @@ def code2flow(raw_source_paths, output_file, language=None, hide_legend=True,
     file_groups.sort()
     all_nodes.sort()
     edges.sort()
-
     logging.info("Generating output file...")
     if isinstance(output_file, str):
         with open(output_file, 'w') as fh:

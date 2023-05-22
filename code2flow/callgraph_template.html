@@ -322,7 +322,7 @@
                             var newWindow = window.open('', '_blank');
 
                             // Fetch the content of big_trade.py
-                            fetch('big_trade.py')
+                            fetch("{ SCRIPT_PATH }")
                             .then(response => response.text())
                             .then(data => {
                                 // Set the content of the new window to the fetched data
