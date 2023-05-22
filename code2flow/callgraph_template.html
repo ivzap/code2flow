@@ -320,7 +320,7 @@
                 windowObj.document.body.appendChild(dummyElement);
                 var lineHeight = dummyElement.offsetHeight;
                 windowObj.document.body.removeChild(dummyElement);
-            return lineHeight;
+                return lineHeight;
             }
  			$(document).ready(function(){
                 $("#graph").graphviz({
@@ -328,7 +328,6 @@
                     ready: function() {
                         var gv = this
                         gv.nodes().on('dblclick', function () {
-                            console.log(this);
                             var nodeData = this.textContent.split(":");
                             var lineToJump = parseInt(nodeData[0], 10);
                             var funcName = nodeData[1];
@@ -346,6 +345,7 @@
                                     var lineNumber = i + 1;
                                     content += '<div style="' + (lineNumber === lineToJump ? 'background-color: yellow;' : '') + '"><span class="line-number">' + lineNumber + '</span>' + lines[i] + '</div>';
                                 }
+                                // Write content to new window
                                 newWindow.document.open();
                                 newWindow.document.write('<pre>' + content + '</pre>');
                                 newWindow.document.close()
