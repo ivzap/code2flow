@@ -24,7 +24,7 @@
 <html>
 	<head>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css">
-		<!-- <link rel="stylesheet" href="css/graphviz.svg.css"> -->
+        <!-- <link rel="stylesheet" href="css/graphviz.svg.css"> -->
 	</head>
 
 	<style>
@@ -314,6 +314,55 @@
                     svg: `{ SVG }`,
                     ready: function() {
                         var gv = this
+                        gv.nodes().on('dblclick', function () {
+                            console.log(this);
+                            var nodeData = this.textContent.split(":");
+                            var lineToJump = parseInt(nodeData[0], 10);
+                            var funcName = nodeData[1];
+                            var newWindow = window.open('', '_blank');
+
+                            // Fetch the content of big_trade.py
+                            fetch('big_trade.py')
+                            .then(response => response.text())
+                            .then(data => {
+                                // Set the content of the new window to the fetched data
+                                var lines = data.split('\n');
+                                // Generate the HTML content with line numbers
+                                var content = '';
+                                for (var i = 0; i < lines.length; i++) {
+                                    var lineNumber = i + 1;
+                                    content += '<div style="' + (lineNumber === lineToJump ? 'background-color: yellow;' : '') + '"><span class="line-number">' + lineNumber + '</span>' + lines[i] + '</div>';
+                                }
+                                newWindow.document.open();
+                                newWindow.document.write('<pre>' + content + '</pre>');
+                                newWindow.document.close()
+                                //setTimeout(function() { newWindow.scrollTo(0,150) }, 1000);
+                                // Function to calculate the line height
+                                // Function to calculate the line height
+                                function calculateLineHeight(windowObj) {
+                                    var dummyElement = windowObj.document.createElement('span');
+                                    dummyElement.innerHTML = 'X'; // Use a single character for measurement
+                                    dummyElement.style.visibility = 'hidden';
+                                    dummyElement.style.position = 'absolute';
+                                    dummyElement.style.fontSize = '1rem'; // Set font size to calculate line height
+                                    dummyElement.style.lineHeight = '1'; // Reset line height to default
+                                    windowObj.document.body.appendChild(dummyElement);
+                                    var lineHeight = dummyElement.offsetHeight;
+                                    windowObj.document.body.removeChild(dummyElement);
+                                return lineHeight;
+                                }
+                                  // Calculate the line height
+                                var lineHeight = calculateLineHeight(newWindow);
+
+                                // Scroll to line 1000
+                                var scrollToPixel = Math.ceil(lineHeight * (lineToJump));
+                                newWindow.scrollTo(0, scrollToPixel);
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                            });
+
+                        });
                         gv.nodes().click(function () {
                             var $set = $()
                             $set.push(this)
