@@ -309,6 +309,19 @@
         }(jQuery); 
         </script>
 		<script type="text/javascript">
+            // Function to calculate the line height
+            function calculateLineHeight(windowObj) {
+                var dummyElement = windowObj.document.createElement('span');
+                dummyElement.innerHTML = 'X'; // Use a single character for measurement
+                dummyElement.style.visibility = 'hidden';
+                dummyElement.style.position = 'absolute';
+                dummyElement.style.fontSize = '1rem'; // Set font size to calculate line height
+                dummyElement.style.lineHeight = '1'; // Reset line height to default
+                windowObj.document.body.appendChild(dummyElement);
+                var lineHeight = dummyElement.offsetHeight;
+                windowObj.document.body.removeChild(dummyElement);
+            return lineHeight;
+            }
  			$(document).ready(function(){
                 $("#graph").graphviz({
                     svg: `{ SVG }`,
@@ -321,7 +334,7 @@
                             var funcName = nodeData[1];
                             var newWindow = window.open('', '_blank');
 
-                            // Fetch the content of big_trade.py
+                            // Fetch the content of trader script
                             fetch("{ SCRIPT_PATH }")
                             .then(response => response.text())
                             .then(data => {
@@ -336,22 +349,8 @@
                                 newWindow.document.open();
                                 newWindow.document.write('<pre>' + content + '</pre>');
                                 newWindow.document.close()
-                                // Function to calculate the line height
-                                function calculateLineHeight(windowObj) {
-                                    var dummyElement = windowObj.document.createElement('span');
-                                    dummyElement.innerHTML = 'X'; // Use a single character for measurement
-                                    dummyElement.style.visibility = 'hidden';
-                                    dummyElement.style.position = 'absolute';
-                                    dummyElement.style.fontSize = '1rem'; // Set font size to calculate line height
-                                    dummyElement.style.lineHeight = '1'; // Reset line height to default
-                                    windowObj.document.body.appendChild(dummyElement);
-                                    var lineHeight = dummyElement.offsetHeight;
-                                    windowObj.document.body.removeChild(dummyElement);
-                                return lineHeight;
-                                }
                                   // Calculate the line height
                                 var lineHeight = calculateLineHeight(newWindow);
-
                                 var scrollToPixel = Math.ceil(lineHeight * (lineToJump));
                                 newWindow.scrollTo(0, scrollToPixel);
                             })

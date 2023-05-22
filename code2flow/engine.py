@@ -275,7 +275,7 @@ def write_file(outfile, nodes, edges, groups, hide_legend=False,
     print("Html file generated successfully")
 
 def find_trader_script(groups):
-    # every group has a file token and class token.
+    # every group has a file token and class token. 
     # iterate over every files class to find trader file
     all_groups = flatten(g.all_groups() for g in groups)
     for i in range(1, len(all_groups), 1):
