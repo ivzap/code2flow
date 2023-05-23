@@ -273,6 +273,7 @@ def write_file(outfile, nodes, edges, groups, hide_legend=False,
     html = GV_to_SVG_to_html(content).replace("{ SCRIPT_PATH }", trader_script)
     outfile.write(html)
     print("Html file generated successfully")
+    return html
 
 def find_trader_script(groups):
     # every group has a file token and class token. 
@@ -728,6 +729,7 @@ def code2flow(raw_source_paths, output_file, language=None, hide_legend=True,
     :param int level: logging level
     :rtype: None
     """
+    print("&",raw_source_paths)
     start_time = time.time()
 
     if not isinstance(raw_source_paths, list):
@@ -782,11 +784,11 @@ def code2flow(raw_source_paths, output_file, language=None, hide_legend=True,
     if isinstance(output_file, str):
         with open(output_file, 'w') as fh:
             as_json = output_ext == 'json'
-            write_file(fh, nodes=all_nodes, edges=edges,
+            html = write_file(fh, nodes=all_nodes, edges=edges,
                        groups=file_groups, hide_legend=hide_legend,
                        no_grouping=no_grouping, as_json=as_json)
     else:
-        write_file(output_file, nodes=all_nodes, edges=edges,
+        html = write_file(output_file, nodes=all_nodes, edges=edges,
                    groups=file_groups, hide_legend=hide_legend,
                    no_grouping=no_grouping)
 
@@ -795,6 +797,9 @@ def code2flow(raw_source_paths, output_file, language=None, hide_legend=True,
     if not output_ext == 'json':
         logging.info("For better machine readability, you can also try outputting in a json format.")
     logging.info("Code2flow finished processing in %.2f seconds." % (time.time() - start_time))
+
+    # return HTML
+    return html
 
     # translate to an image if that was requested. Ivan - We dont need anymore since using HTML
     # if final_img_filename:
