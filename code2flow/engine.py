@@ -23,7 +23,7 @@ TRADER_SCRIPT_ID = "Gr8Script"
 VERSION = '2.5.1'
 
 IMAGE_EXTENSIONS = ('png', 'svg')
-TEXT_EXTENSIONS = ('dot', 'gv', 'json')
+TEXT_EXTENSIONS = ('dot', 'gv', 'json', 'html')
 VALID_EXTENSIONS = IMAGE_EXTENSIONS + TEXT_EXTENSIONS
 
 DESCRIPTION = "Generate flow charts from your source code. " \
