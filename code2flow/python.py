@@ -5,7 +5,6 @@ import os
 from .model import (OWNER_CONST, GROUP_TYPE, Group, Node, Call, Variable,
                     BaseLanguage, djoin)
 
-
 def get_call_from_func_element(func):
     """
     Given a python ast that represents a function call, clear and create our
@@ -140,11 +139,25 @@ def get_inherits(tree):
     return [base.id for base in tree.bases if type(base) == ast.Name]
 
 
+def add_trace_on_timer(script_lines):
+    on_timer_tracing = CauseTimerTracing()
+    for i, line in enumerate(script_lines):
+        found_timer = line.find(on_timer_tracing.user_call)
+        if found_timer != -1:
+            new_line = script_lines[i][0:found_timer] + on_timer_tracing.trace
+            script_lines[i] = new_line
+    return "".join(line+"\n" for line in script_lines)
+
+class CauseTimerTracing:
+    def __init__(self):
+        self.trace = "self.on_timer()"
+        self.user_call = "service.add_time_trigger"
+
 class Python(BaseLanguage):
     @staticmethod
     def assert_dependencies():
         pass
-
+    
     @staticmethod
     def get_tree(filename, _):
         """
@@ -155,10 +168,12 @@ class Python(BaseLanguage):
         """
         try:
             with open(filename) as f:
+                print("FILE_NAME:", filename)
                 raw = f.read()
         except ValueError:
             with open(filename, encoding='UTF-8') as f:
                 raw = f.read()
+        raw = add_trace_on_timer(raw.split("\n"))
         return ast.parse(raw)
 
     @staticmethod
