@@ -32,6 +32,7 @@ def get_call_from_func_element(func):
             owner_token = OWNER_CONST.UNKNOWN_VAR
         return Call(token=func.attr, line_number=func.lineno, owner_token=owner_token)
     if type(func) == ast.Name:
+        
         return Call(token=func.id, line_number=func.lineno)
     if type(func) in (ast.Subscript, ast.Call):
         return None
@@ -138,7 +139,6 @@ def get_inherits(tree):
     """
     return [base.id for base in tree.bases if type(base) == ast.Name]
 
-
 def add_trace_on_timer(script_lines):
     on_timer_tracing = CauseTimerTracing()
     for i, line in enumerate(script_lines):
@@ -152,6 +152,64 @@ class CauseTimerTracing:
     def __init__(self):
         self.trace = "self.on_timer()"
         self.user_call = "service.add_time_trigger"
+
+def get_ast_functions(root):
+    """
+    Makes a O(1) lookup table for all ast functions
+    Warning if functions named the same in ast this will cause overwriting in dict(pitfall of ast)
+    """
+    functions = {}
+    for node in ast.walk(root):
+        if isinstance(node, ast.FunctionDef):
+            function_name = node.name
+            functions[function_name] = node
+    return functions
+
+def trace_event_streams(node, root, functions):
+    if isinstance(node, ast.Dict):
+        for key, value in zip(node.keys, node.values):
+            if isinstance(value, ast.Str):
+                # Assuming the values are function names
+                function_name = value.s
+                function_call = node.values[node.values.index(value)]
+                is_from_class = func_is_from_class(function_name, root)
+                if is_from_class:
+                    # Replace with class method call (self.function_name)
+                    function_call = ast.parse(f'self.{function_name}()').body[0].value
+                elif function_name in functions:
+                    # Replace with regular function call (function_name())
+                    function_call = ast.parse(f'{function_name}()').body[0].value
+                node.values[node.values.index(value)] = function_call
+    # Handle assigns, i.e dict[key] = 'function_name'
+    if isinstance(node, ast.Assign):
+        if isinstance(node.value, ast.Constant):
+            function_name = node.value.value
+            function_call = node.value
+            is_from_class = func_is_from_class(function_name, root)
+            if is_from_class:
+                # Replace with class method call (self.function_name)
+                function_call = ast.parse(f'self.{function_name}()').body[0].value
+            elif function_name in functions:
+                # Replace with regular function call (function_name())
+                function_call = ast.parse(f'{function_name}()').body[0].value
+            node.value = function_call
+    
+    for child_node in ast.iter_child_nodes(node):
+        trace_event_streams(child_node, root, functions)
+
+def func_is_from_class(function_name, root):
+    root.parent = None
+    for node in ast.walk(root):
+        for child in ast.iter_child_nodes(node):
+            child.parent = node
+            if isinstance(node, ast.FunctionDef) and node.name == function_name:
+                # determine if node from classDef
+                cur_parent = child.parent
+                while cur_parent:
+                    if isinstance(cur_parent, ast.ClassDef):
+                        return True
+                    cur_parent = cur_parent.parent
+    return False
 
 class Python(BaseLanguage):
     @staticmethod
@@ -174,7 +232,11 @@ class Python(BaseLanguage):
             with open(filename, encoding='UTF-8') as f:
                 raw = f.read()
         raw = add_trace_on_timer(raw.split("\n"))
-        return ast.parse(raw)
+        root = ast.parse(raw)
+        functions = get_ast_functions(root)
+        if "register_event_streams" in functions:
+            trace_event_streams(node=functions["register_event_streams"], root=root, functions=functions)
+        return root
 
     @staticmethod
     def separate_namespaces(tree):
