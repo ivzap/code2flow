@@ -153,8 +153,6 @@ class CauseTimerTracing:
         self.trace = "self.on_timer()"
         self.user_call = "service.add_time_trigger"
 
-import ast
-
 class EventStreamTracing:
     def __init__(self, root):
         self.root = root
