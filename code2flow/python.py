@@ -153,63 +153,71 @@ class CauseTimerTracing:
         self.trace = "self.on_timer()"
         self.user_call = "service.add_time_trigger"
 
-def get_ast_functions(root):
-    """
-    Makes a O(1) lookup table for all ast functions
-    Warning if functions named the same in ast this will cause overwriting in dict(pitfall of ast)
-    """
-    functions = {}
-    for node in ast.walk(root):
-        if isinstance(node, ast.FunctionDef):
-            function_name = node.name
-            functions[function_name] = node
-    return functions
+import ast
 
-def trace_event_streams(node, root, functions):
-    if isinstance(node, ast.Dict):
-        for key, value in zip(node.keys, node.values):
-            if isinstance(value, ast.Str):
-                # Assuming the values are function names
-                function_name = value.s
-                function_call = node.values[node.values.index(value)]
-                is_from_class = func_is_from_class(function_name, root)
+class EventStreamTracing:
+    def __init__(self, root):
+        self.root = root
+        self.functions = self._get_ast_functions()
+    
+    def _get_ast_functions(self):
+        """
+        Makes an O(1) lookup table for all AST functions
+        Warning: If functions named the same in AST, this will cause overwriting in dict (pitfall of AST)
+        """
+        functions = {}
+        for node in ast.walk(self.root):
+            if isinstance(node, ast.FunctionDef):
+                function_name = node.name
+                functions[function_name] = node
+
+        return functions
+
+    def trace_event_streams(self, node):
+        if isinstance(node, ast.Dict):
+            for key, value in zip(node.keys, node.values):
+                if isinstance(value, ast.Str):
+                    # Assuming the values are function names
+                    function_name = value.s
+                    function_call = node.values[node.values.index(value)]
+                    is_from_class = self.func_is_from_class(function_name)
+                    if is_from_class:
+                        # Replace with class method call (self.function_name)
+                        function_call = ast.parse(f'self.{function_name}()').body[0].value
+                    elif function_name in self.functions:
+                        # Replace with regular function call (function_name())
+                        function_call = ast.parse(f'{function_name}()').body[0].value
+                    node.values[node.values.index(value)] = function_call
+        # Handle assigns, i.e dict[key] = 'function_name'
+        if isinstance(node, ast.Assign):
+            if isinstance(node.value, ast.Constant):
+                function_name = node.value.value
+                function_call = node.value
+                is_from_class = self.func_is_from_class(function_name)
                 if is_from_class:
                     # Replace with class method call (self.function_name)
                     function_call = ast.parse(f'self.{function_name}()').body[0].value
-                elif function_name in functions:
+                elif function_name in self.functions:
                     # Replace with regular function call (function_name())
                     function_call = ast.parse(f'{function_name}()').body[0].value
-                node.values[node.values.index(value)] = function_call
-    # Handle assigns, i.e dict[key] = 'function_name'
-    if isinstance(node, ast.Assign):
-        if isinstance(node.value, ast.Constant):
-            function_name = node.value.value
-            function_call = node.value
-            is_from_class = func_is_from_class(function_name, root)
-            if is_from_class:
-                # Replace with class method call (self.function_name)
-                function_call = ast.parse(f'self.{function_name}()').body[0].value
-            elif function_name in functions:
-                # Replace with regular function call (function_name())
-                function_call = ast.parse(f'{function_name}()').body[0].value
-            node.value = function_call
-    
-    for child_node in ast.iter_child_nodes(node):
-        trace_event_streams(child_node, root, functions)
+                node.value = function_call
 
-def func_is_from_class(function_name, root):
-    root.parent = None
-    for node in ast.walk(root):
-        for child in ast.iter_child_nodes(node):
-            child.parent = node
-            if isinstance(node, ast.FunctionDef) and node.name == function_name:
-                # determine if node from classDef
-                cur_parent = child.parent
-                while cur_parent:
-                    if isinstance(cur_parent, ast.ClassDef):
-                        return True
-                    cur_parent = cur_parent.parent
-    return False
+        for child_node in ast.iter_child_nodes(node):
+            self.trace_event_streams(child_node)
+
+    def func_is_from_class(self, function_name):
+        self.root.parent = None
+        for node in ast.walk(self.root):
+            for child in ast.iter_child_nodes(node):
+                child.parent = node
+                if isinstance(node, ast.FunctionDef) and node.name == function_name:
+                    # determine if node from ClassDef
+                    cur_parent = child.parent
+                    while cur_parent:
+                        if isinstance(cur_parent, ast.ClassDef):
+                            return True
+                        cur_parent = cur_parent.parent
+        return False
 
 class Python(BaseLanguage):
     @staticmethod
@@ -233,9 +241,11 @@ class Python(BaseLanguage):
                 raw = f.read()
         raw = add_trace_on_timer(raw.split("\n"))
         root = ast.parse(raw)
-        functions = get_ast_functions(root)
-        if "register_event_streams" in functions:
-            trace_event_streams(node=functions["register_event_streams"], root=root, functions=functions)
+        ast_event_tracing = EventStreamTracing(root)
+        if "register_event_streams" in ast_event_tracing.functions:
+            ast_event_tracing.trace_event_streams(
+                node=ast_event_tracing.functions["register_event_streams"]
+            )
         return root
 
     @staticmethod
