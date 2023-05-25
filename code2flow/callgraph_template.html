@@ -332,22 +332,31 @@
                             var lineToJump = parseInt(nodeData[0], 10);
                             var funcName = nodeData[1];
                             var newWindow = window.open('', '_blank');
-                            var data = this.textContent
-                            var lines = data.split('\n');
-                            // Generate the HTML content with line numbers
-                            var content = '';
-                            for (var i = 0; i < lines.length; i++) {
-                                var lineNumber = i + 1;
-                                content += '<div style="' + (lineNumber === lineToJump ? 'background-color: yellow;' : '') + '"><span class="line-number">' + "<b>" + lineNumber + "</b>" + "    " + '</span>' + lines[i] + '</div>';
-                            }
-                            // Write content to new window
-                            newWindow.document.open();
-                            newWindow.document.write('<pre>' + content + '</pre>');
-                            newWindow.document.close()
-                                // Calculate the line height
-                            var lineHeight = calculateLineHeight(newWindow);
-                            var scrollToPixel = Math.ceil(lineHeight * (lineToJump));
-                            newWindow.scrollTo(0, scrollToPixel);
+
+                            // Fetch the content of trader script
+                            fetch("{ SCRIPT_PATH }")
+                            .then(response => response.text())
+                            .then(data => {
+                                // Set the content of the new window to the fetched data
+                                var lines = data.split('\n');
+                                // Generate the HTML content with line numbers
+                                var content = '';
+                                for (var i = 0; i < lines.length; i++) {
+                                    var lineNumber = i + 1;
+                                    content += '<div style="' + (lineNumber === lineToJump ? 'background-color: yellow;' : '') + '"><span class="line-number">' + lineNumber + '</span>' + lines[i] + '</div>';
+                                }
+                                // Write content to new window
+                                newWindow.document.open();
+                                newWindow.document.write('<pre>' + content + '</pre>');
+                                newWindow.document.close()
+                                  // Calculate the line height
+                                var lineHeight = calculateLineHeight(newWindow);
+                                var scrollToPixel = Math.ceil(lineHeight * (lineToJump));
+                                newWindow.scrollTo(0, scrollToPixel);
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                            });
 
                         });
                         gv.nodes().click(function () {
