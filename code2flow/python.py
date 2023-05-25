@@ -139,24 +139,26 @@ def get_inherits(tree):
     """
     return [base.id for base in tree.bases if type(base) == ast.Name]
 
-def add_trace_on_timer(script_lines):
-    on_timer_tracing = CauseTimerTracing()
-    for i, line in enumerate(script_lines):
-        found_timer = line.find(on_timer_tracing.user_call)
-        if found_timer != -1:
-            new_line = script_lines[i][0:found_timer] + on_timer_tracing.trace
-            script_lines[i] = new_line
-    return "".join(line+"\n" for line in script_lines)
-
-class CauseTimerTracing:
-    def __init__(self):
-        self.trace = "self.on_timer()"
-        self.user_call = "service.add_time_trigger"
+class TimerTracing:
+    def __init__(self, root, trigger_name, timer_name):
+        self.root = root
+        self.add_trigger = trigger_name
+        self.on_timer = timer_name 
+        
+    def trace(self):
+        traced = False
+        for node in ast.walk(self.root):
+            if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name) and node.attr == self.add_trigger:
+                node.attr = self.on_timer
+                node.value.id = 'self'
+                traced = True
+        return traced
 
 class EventStreamTracing:
-    def __init__(self, root):
+    def __init__(self, root, on_function):
         self.root = root
         self.functions = self._get_ast_functions()
+        self.on_function = on_function
     
     def _get_ast_functions(self):
         """
@@ -170,15 +172,22 @@ class EventStreamTracing:
                 functions[function_name] = node
 
         return functions
+    
+    def trace(self):
+        # only trace on_function, if it exists(duhh)
+        if self.on_function not in self.functions:
+            return False
+        self._trace_event_streams(node=self.functions[self.on_function])
+        return True
 
-    def trace_event_streams(self, node):
+    def _trace_event_streams(self, node):
         if isinstance(node, ast.Dict):
             for key, value in zip(node.keys, node.values):
                 if isinstance(value, ast.Str):
                     # Assuming the values are function names
                     function_name = value.s
                     function_call = node.values[node.values.index(value)]
-                    is_from_class = self.func_is_from_class(function_name)
+                    is_from_class = self._func_from_class(function_name)
                     if is_from_class:
                         # Replace with class method call (self.function_name)
                         function_call = ast.parse(f'self.{function_name}()').body[0].value
@@ -191,7 +200,7 @@ class EventStreamTracing:
             if isinstance(node.value, ast.Constant):
                 function_name = node.value.value
                 function_call = node.value
-                is_from_class = self.func_is_from_class(function_name)
+                is_from_class = self._func_from_class(function_name)
                 if is_from_class:
                     # Replace with class method call (self.function_name)
                     function_call = ast.parse(f'self.{function_name}()').body[0].value
@@ -201,9 +210,9 @@ class EventStreamTracing:
                 node.value = function_call
 
         for child_node in ast.iter_child_nodes(node):
-            self.trace_event_streams(child_node)
+            self._trace_event_streams(child_node)
 
-    def func_is_from_class(self, function_name):
+    def _func_from_class(self, function_name):
         self.root.parent = None
         for node in ast.walk(self.root):
             for child in ast.iter_child_nodes(node):
@@ -237,13 +246,11 @@ class Python(BaseLanguage):
         except ValueError:
             with open(filename, encoding='UTF-8') as f:
                 raw = f.read()
-        raw = add_trace_on_timer(raw.split("\n"))
         root = ast.parse(raw)
-        ast_event_tracing = EventStreamTracing(root)
-        if "register_event_streams" in ast_event_tracing.functions:
-            ast_event_tracing.trace_event_streams(
-                node=ast_event_tracing.functions["register_event_streams"]
-            )
+        timer_tracing = TimerTracing(root,trigger_name="add_time_trigger", timer_name="on_timer")
+        timer_tracing.trace()
+        ast_event_tracing = EventStreamTracing(root, on_function="register_event_streams")
+        ast_event_tracing.trace()
         return root
 
     @staticmethod
