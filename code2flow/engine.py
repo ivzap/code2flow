@@ -9,6 +9,8 @@ import time
 import subprocess
 import graphviz
 import os
+import ast
+from bs4 import BeautifulSoup
 from .python import Python
 from .javascript import Javascript
 from .ruby import Ruby
@@ -235,7 +237,7 @@ def generate_json(nodes, edges):
 
 
 def write_file(outfile, nodes, edges, groups, hide_legend=False,
-               no_grouping=False, as_json=False):
+               no_grouping=False, as_json=False, sources=None, function_map=None):
     '''
     Write a dot file that can be read by graphviz
 
@@ -270,7 +272,12 @@ def write_file(outfile, nodes, edges, groups, hide_legend=False,
     print("This is the outfile!", outfile)
     # Write/Generate SVG File From GV File(outfile)
     trader_script = find_trader_script(groups)
-    html = GV_to_SVG_to_html(content).replace("{ SCRIPT_PATH }", trader_script)
+    trader_script_path = sources 
+    if isinstance(sources, list):
+        for path in sources:
+            if trader_script in path:
+                trader_script_path = path
+    html = GV_to_SVG_to_html(content, function_map).replace("{ SCRIPT_PATH }", trader_script_path)
     outfile.write(html)
     print("Html file generated successfully")
     return html
@@ -285,20 +292,52 @@ def find_trader_script(groups):
                 return all_groups[i-1].token + ".py"
     raise("Could not find traders script")
 
-
-def GV_to_SVG_to_html(dot_content):
+def GV_to_SVG_to_html(dot_content, function_map):
     # Execute the dot command
+    # To-Do: Parse SVG and add metadata of function def to each node and its associated function
     graph_svg = graphviz.Source(dot_content)
     if sys.platform == 'win32':
         svg_content = graph_svg.pipe(format='svg').decode('cp1252')
     else:
         svg_content = graph_svg.pipe(format='svg').decode('utf-8')
+    svg_content = set_node_metadata(svg_content, function_map)
     with open(HTML_TEMPLATE, 'r') as file:
         html = file.read()
         html = html.replace('{ SVG }', svg_content)
         # replace { SCRIPT_PATH } with the path to trader script
-
     return html
+
+
+def set_node_metadata(svg, function_map):
+    # Parse the SVG content using BeautifulSoup with "html.parser"
+    soup = BeautifulSoup(svg, "html.parser")
+
+    # Find all group elements with class="node"
+    group_elements = soup.find_all("g", class_="node")
+
+    # Iterate over the group elements
+    for group_element in group_elements:
+        # Get the node_uid from the group element's title
+        title_element = group_element.find("title")
+        if title_element is not None:
+            node_uid = title_element.text.strip()
+
+            # Check if node_uid exists in the function_map
+            if node_uid in function_map:
+                # Create a hidden text element for the metadata
+                metadata_element = soup.new_tag("text", style="display:none;")
+                metadata_element.string = function_map[node_uid]
+
+                # Append the metadata element to the group element
+                group_element.append(metadata_element)
+
+    # Get the modified SVG content as a string
+    modified_svg_content = str(soup)
+
+    # Return the modified SVG content
+    return modified_svg_content
+
+
 
 
 def determine_language(individual_files):
@@ -507,12 +546,16 @@ def map_it(sources, extension, no_trimming, exclude_namespaces, exclude_function
                 logging.warning("Could not parse %r. (%r) Skipping...", source, ex)
             else:
                 raise ex
+    # 1. cont. map function name to function definition
+    # how do we deal with the same name functions in two different files?
+
 
     # 2. Find all groups (classes/modules) and nodes (functions) (a lot happens here)
     file_groups = []
     for source, file_ast_tree in file_ast_trees:
         file_group = make_file_group(file_ast_tree, source, extension)
         file_groups.append(file_group)
+    
 
     # 3. Trim namespaces / functions to exactly what we want
     if exclude_namespaces or include_only_namespaces:
@@ -590,9 +633,23 @@ def map_it(sources, extension, no_trimming, exclude_namespaces, exclude_function
             if not group.all_nodes():
                 group.remove_from_parent()
 
+    def ast_find_function(function, root):
+        for node in ast.walk(root):
+            if isinstance(node, ast.FunctionDef) and node.name == function:
+                return ast.unparse(node)
+
     file_groups = [g for g in file_groups if g.all_nodes()]
     all_nodes = list(nodes_with_edges)
-
+    # 8. cont. find function map
+    function_map = {}
+    for node in all_nodes:
+        file_group = node.file_group()
+        file_name = file_group.filename()
+        function_name = node.label().split(":")[1][0:-2].replace(' ', '') # remove empty chars and brackets '()'
+        for source, file_ast_tree in file_ast_trees:
+            if f"{file_name}.{extension}" in source:
+                code = ast_find_function(function_name, root=file_ast_tree)
+                function_map[node.uid] = code
     if not all_nodes:
         logging.warning("No functions found! Most likely, your file(s) do not have "
                         "functions that call each other. Note that to generate a flowchart, "
@@ -601,7 +658,9 @@ def map_it(sources, extension, no_trimming, exclude_namespaces, exclude_function
                         "with --exclude-* / --include-* / --target-function arguments. ")
         logging.warning("Code2flow will generate an empty output file.")
 
-    return file_groups, all_nodes, edges
+    
+
+    return file_groups, all_nodes, edges, function_map
 
 
 def _limit_namespaces(file_groups, exclude_namespaces, include_only_namespaces):
@@ -748,7 +807,7 @@ def code2flow(raw_source_paths, output_file, language=None, hide_legend=True,
     logging.basicConfig(format="Code2Flow: %(message)s", level=level)
 
     sources, language = get_sources_and_language(raw_source_paths, language)
-    
+    print("$SOURCES$:", sources)
     output_ext = None
     if isinstance(output_file, str):
         assert '.' in output_file, "Output filename must end in one of: %r." % set(VALID_EXTENSIONS)
@@ -768,7 +827,9 @@ def code2flow(raw_source_paths, output_file, language=None, hide_legend=True,
         output_file, extension = output_file.rsplit('.', 1)
         output_file += '.html'
 
-    file_groups, all_nodes, edges = map_it(sources, language, no_trimming,
+    # add feature: hash function name to unparsed ast tree for the corresponding ast tree
+    # finally parse the generated svg and add metadata of the function definition
+    file_groups, all_nodes, edges, function_map = map_it(sources, language, no_trimming,
                                            exclude_namespaces, exclude_functions,
                                            include_only_namespaces, include_only_functions,
                                            skip_parse_errors, lang_params)
@@ -780,17 +841,18 @@ def code2flow(raw_source_paths, output_file, language=None, hide_legend=True,
     file_groups.sort()
     all_nodes.sort()
     edges.sort()
+
     logging.info("Generating output file...")
     if isinstance(output_file, str):
         with open(output_file, 'w') as fh:
             as_json = output_ext == 'json'
             html = write_file(fh, nodes=all_nodes, edges=edges,
                        groups=file_groups, hide_legend=hide_legend,
-                       no_grouping=no_grouping, as_json=as_json)
+                       no_grouping=no_grouping, as_json=as_json, sources=sources, function_map=function_map)
     else:
         html = write_file(output_file, nodes=all_nodes, edges=edges,
                    groups=file_groups, hide_legend=hide_legend,
-                   no_grouping=no_grouping)
+                   no_grouping=no_grouping, sources=sources, function_map=function_map)
 
     logging.info("Wrote output file %r with %d nodes and %d edges.",
                  output_file, len(all_nodes), len(edges))
