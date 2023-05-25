@@ -218,7 +218,7 @@ class EventStreamTracing:
             for child in ast.iter_child_nodes(node):
                 child.parent = node
                 if isinstance(node, ast.FunctionDef) and node.name == function_name:
-                    # determine if node from ClassDef
+                    # Determine if node from ClassDef
                     cur_parent = child.parent
                     while cur_parent:
                         if isinstance(cur_parent, ast.ClassDef):

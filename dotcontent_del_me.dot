@@ -1,0 +1,131 @@
+digraph G {
+concentrate=true;
+splines="ortho";
+rankdir="LR";
+subgraph legend{
+    rank = min;
+    label = "legend";
+    Legend [shape=none, margin=0, label = <
+        <table cellspacing="0" cellpadding="0" border="1"><tr><td>Code2flow Legend</td></tr><tr><td>
+        <table cellspacing="0">
+        <tr><td>Regular function</td><td width="50px" bgcolor='#cccccc'></td></tr>
+        <tr><td>Trunk function (nothing calls this)</td><td bgcolor='#966F33'></td></tr>
+        <tr><td>Leaf function (this calls nothing else)</td><td bgcolor='#6db33f'></td></tr>
+        <tr><td>Function call</td><td><font color='black'>&#8594;</font></td></tr>
+        </table></td></tr></table>
+        >];
+}node_8ff64cdf [label="2: algo_buy()" my_metadata="Some metadata value" name="ktgfunc::Algo.algo_buy" shape="rect" style="rounded,filled" fillcolor="#6db33f" ];
+node_840ef9eb [label="4: algo_sell()" name="ktgfunc::Algo.algo_sell" shape="rect" style="rounded,filled" fillcolor="#6db33f" ];
+node_0ecd7da8 [label="2639: algo_buy_exit()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.algo_buy_exit" shape="rect" style="rounded,filled" fillcolor="#cccccc" ];
+node_2a31bec9 [label="2357: algo_buy_increase()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.algo_buy_increase" shape="rect" style="rounded,filled" fillcolor="#966F33" ];
+node_bd9a1c51 [label="2306: algo_buy_init()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.algo_buy_init" shape="rect" style="rounded,filled" fillcolor="#cccccc" ];
+node_2009b5e3 [label="2594: algo_sell_exit()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.algo_sell_exit" shape="rect" style="rounded,filled" fillcolor="#cccccc" ];
+node_01b91d76 [label="2500: algo_sell_increase()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.algo_sell_increase" shape="rect" style="rounded,filled" fillcolor="#966F33" ];
+node_90901abc [label="2449: algo_sell_init()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.algo_sell_init" shape="rect" style="rounded,filled" fillcolor="#cccccc" ];
+node_5a48158f [label="604: create_alerters()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.create_alerters" shape="rect" style="rounded,filled" fillcolor="#6db33f" ];
+node_29a1c0fa [label="1285: estimate_time_interval()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.estimate_time_interval" shape="rect" style="rounded,filled" fillcolor="#6db33f" ];
+node_89c893f0 [label="2695: execute_command()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.execute_command" shape="rect" style="rounded,filled" fillcolor="#6db33f" ];
+node_67171b2c [label="762: get_risk_management_algorithm_params()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.get_risk_management_algorithm_params" shape="rect" style="rounded,filled" fillcolor="#cccccc" ];
+node_2085ee5b [label="653: get_symbol_universe()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.get_symbol_universe" shape="rect" style="rounded,filled" fillcolor="#cccccc" ];
+node_0df74306 [label="706: get_trading_algorithm_params()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.get_trading_algorithm_params" shape="rect" style="rounded,filled" fillcolor="#cccccc" ];
+node_5db86be8 [label="818: get_trading_order_algorithm_params()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.get_trading_order_algorithm_params" shape="rect" style="rounded,filled" fillcolor="#cccccc" ];
+node_21ca4dd9 [label="338: initialize_default_parameters()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.initialize_default_parameters" shape="rect" style="rounded,filled" fillcolor="#6db33f" ];
+node_b60a78d6 [label="2234: initialize_order_long()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.initialize_order_long" shape="rect" style="rounded,filled" fillcolor="#6db33f" ];
+node_694b3c3f [label="2270: initialize_order_short()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.initialize_order_short" shape="rect" style="rounded,filled" fillcolor="#6db33f" ];
+node_e49e33e4 [label="1215: initialize_risk_management_algorithm_params_for_symbol()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.initialize_risk_management_algorithm_params_for_symbol" shape="rect" style="rounded,filled" fillcolor="#6db33f" ];
+node_bdc37d94 [label="1092: initialize_trading_algorithm_params_for_symbol()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.initialize_trading_algorithm_params_for_symbol" shape="rect" style="rounded,filled" fillcolor="#6db33f" ];
+node_2dca6e1c [label="1243: initialize_trading_order_algorithm_params_for_symbol()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.initialize_trading_order_algorithm_params_for_symbol" shape="rect" style="rounded,filled" fillcolor="#6db33f" ];
+node_b9e389ec [label="1480: log_risk_management_algo_params_per_symbol()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.log_risk_management_algo_params_per_symbol" shape="rect" style="rounded,filled" fillcolor="#6db33f" ];
+node_c4fb09e2 [label="1353: log_trade_algo_params_per_symbol()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.log_trade_algo_params_per_symbol" shape="rect" style="rounded,filled" fillcolor="#6db33f" ];
+node_f460d1c8 [label="1553: log_trade_on_fill_params_per_symbol()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.log_trade_on_fill_params_per_symbol" shape="rect" style="rounded,filled" fillcolor="#6db33f" ];
+node_e26abea9 [label="1509: log_trade_order_algo_params_per_symbol()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.log_trade_order_algo_params_per_symbol" shape="rect" style="rounded,filled" fillcolor="#6db33f" ];
+node_77bb0606 [label="2162: on_dev_evt()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.on_dev_evt" shape="rect" style="rounded,filled" fillcolor="#cccccc" ];
+node_ae18612b [label="2015: on_fill()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.on_fill" shape="rect" style="rounded,filled" fillcolor="#966F33" ];
+node_4cb32d1c [label="880: on_start()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.on_start" shape="rect" style="rounded,filled" fillcolor="#966F33" ];
+node_2429c5fb [label="965: on_start_akt_pd_trade()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.on_start_akt_pd_trade" shape="rect" style="rounded,filled" fillcolor="#cccccc" ];
+node_83320878 [label="459: on_strategy_start()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.on_strategy_start" shape="rect" style="rounded,filled" fillcolor="#966F33" ];
+node_43e0a90b [label="1712: on_timer()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.on_timer" shape="rect" style="rounded,filled" fillcolor="#cccccc" ];
+node_e7c05d75 [label="1850: on_trade()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.on_trade" shape="rect" style="rounded,filled" fillcolor="#966F33" ];
+node_4fd7848c [label="578: register_event_streams()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.register_event_streams" shape="rect" style="rounded,filled" fillcolor="#966F33" ];
+node_c00de74a [label="588: set_VXX_proxy()" name="test1::Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47.set_VXX_proxy" shape="rect" style="rounded,filled" fillcolor="#6db33f" ];
+node_0ecd7da8 -> node_8ff64cdf [color="#000000" penwidth="2"];
+node_2a31bec9 -> node_8ff64cdf [color="#E69F00" penwidth="2"];
+node_bd9a1c51 -> node_8ff64cdf [color="#E69F00" penwidth="2"];
+node_2009b5e3 -> node_840ef9eb [color="#009E73" penwidth="2"];
+node_01b91d76 -> node_840ef9eb [color="#D55E00" penwidth="2"];
+node_90901abc -> node_840ef9eb [color="#F0E442" penwidth="2"];
+node_67171b2c -> node_67171b2c [color="#F0E442" penwidth="2"];
+node_2085ee5b -> node_2085ee5b [color="#009E73" penwidth="2"];
+node_0df74306 -> node_0df74306 [color="#D55E00" penwidth="2"];
+node_5db86be8 -> node_5db86be8 [color="#000000" penwidth="2"];
+node_77bb0606 -> node_bd9a1c51 [color="#D55E00" penwidth="2"];
+node_77bb0606 -> node_90901abc [color="#D55E00" penwidth="2"];
+node_77bb0606 -> node_29a1c0fa [color="#D55E00" penwidth="2"];
+node_77bb0606 -> node_29a1c0fa [color="#D55E00" penwidth="2"];
+node_77bb0606 -> node_89c893f0 [color="#D55E00" penwidth="2"];
+node_ae18612b -> node_f460d1c8 [color="#009E73" penwidth="2"];
+node_4cb32d1c -> node_b60a78d6 [color="#F0E442" penwidth="2"];
+node_4cb32d1c -> node_694b3c3f [color="#F0E442" penwidth="2"];
+node_4cb32d1c -> node_b9e389ec [color="#F0E442" penwidth="2"];
+node_4cb32d1c -> node_c4fb09e2 [color="#F0E442" penwidth="2"];
+node_4cb32d1c -> node_e26abea9 [color="#F0E442" penwidth="2"];
+node_4cb32d1c -> node_2429c5fb [color="#F0E442" penwidth="2"];
+node_4cb32d1c -> node_43e0a90b [color="#F0E442" penwidth="2"];
+node_2429c5fb -> node_e49e33e4 [color="#009E73" penwidth="2"];
+node_2429c5fb -> node_bdc37d94 [color="#009E73" penwidth="2"];
+node_2429c5fb -> node_2dca6e1c [color="#009E73" penwidth="2"];
+node_83320878 -> node_5a48158f [color="#000000" penwidth="2"];
+node_83320878 -> node_67171b2c [color="#000000" penwidth="2"];
+node_83320878 -> node_2085ee5b [color="#000000" penwidth="2"];
+node_83320878 -> node_0df74306 [color="#000000" penwidth="2"];
+node_83320878 -> node_5db86be8 [color="#000000" penwidth="2"];
+node_83320878 -> node_21ca4dd9 [color="#000000" penwidth="2"];
+node_83320878 -> node_c00de74a [color="#000000" penwidth="2"];
+node_43e0a90b -> node_0ecd7da8 [color="#009E73" penwidth="2"];
+node_43e0a90b -> node_0ecd7da8 [color="#009E73" penwidth="2"];
+node_43e0a90b -> node_0ecd7da8 [color="#009E73" penwidth="2"];
+node_43e0a90b -> node_0ecd7da8 [color="#009E73" penwidth="2"];
+node_43e0a90b -> node_2009b5e3 [color="#009E73" penwidth="2"];
+node_43e0a90b -> node_2009b5e3 [color="#009E73" penwidth="2"];
+node_43e0a90b -> node_2009b5e3 [color="#009E73" penwidth="2"];
+node_43e0a90b -> node_2009b5e3 [color="#009E73" penwidth="2"];
+node_43e0a90b -> node_b60a78d6 [color="#009E73" penwidth="2"];
+node_43e0a90b -> node_694b3c3f [color="#009E73" penwidth="2"];
+node_e7c05d75 -> node_0ecd7da8 [color="#0072B2" penwidth="2"];
+node_e7c05d75 -> node_0ecd7da8 [color="#0072B2" penwidth="2"];
+node_e7c05d75 -> node_0ecd7da8 [color="#0072B2" penwidth="2"];
+node_e7c05d75 -> node_0ecd7da8 [color="#0072B2" penwidth="2"];
+node_e7c05d75 -> node_2009b5e3 [color="#0072B2" penwidth="2"];
+node_e7c05d75 -> node_2009b5e3 [color="#0072B2" penwidth="2"];
+node_e7c05d75 -> node_2009b5e3 [color="#0072B2" penwidth="2"];
+node_e7c05d75 -> node_2009b5e3 [color="#0072B2" penwidth="2"];
+node_e7c05d75 -> node_b60a78d6 [color="#0072B2" penwidth="2"];
+node_e7c05d75 -> node_694b3c3f [color="#0072B2" penwidth="2"];
+node_4fd7848c -> node_77bb0606 [color="#F0E442" penwidth="2"];
+subgraph cluster_58208fea {
+    label="File: ktgfunc";
+    name="ktgfunc";
+    style="filled";
+    graph[style=dotted];
+    subgraph cluster_b4169c75 {
+        node_8ff64cdf node_840ef9eb;
+        label="Class: Algo";
+        name="Algo";
+        style="filled";
+        graph[style=dotted];
+    };
+};
+subgraph cluster_45fbd41d {
+    label="File: test1";
+    name="test1";
+    style="filled";
+    graph[style=dotted];
+    subgraph cluster_a13af175 {
+        node_21ca4dd9 node_83320878 node_4fd7848c node_c00de74a node_5a48158f node_2085ee5b node_0df74306 node_67171b2c node_5db86be8 node_4cb32d1c node_2429c5fb node_bdc37d94 node_e49e33e4 node_2dca6e1c node_29a1c0fa node_c4fb09e2 node_b9e389ec node_e26abea9 node_f460d1c8 node_43e0a90b node_e7c05d75 node_ae18612b node_77bb0606 node_b60a78d6 node_694b3c3f node_bd9a1c51 node_2a31bec9 node_90901abc node_01b91d76 node_2009b5e3 node_0ecd7da8 node_89c893f0;
+        label="Class: Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47";
+        name="Gr8Script8600b27ff9ad4a768a6935d9c6b2ac47";
+        style="filled";
+        graph[style=dotted];
+    };
+};
+}
