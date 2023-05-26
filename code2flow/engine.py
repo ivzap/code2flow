@@ -236,7 +236,7 @@ def generate_json(nodes, edges):
     }})
 
 
-def write_file(outfile, nodes, edges, groups, hide_legend=False,
+def write_file(nodes, edges, groups, hide_legend=False,
                no_grouping=False, as_json=False, sources=None, function_map=None):
     '''
     Write a dot file that can be read by graphviz
@@ -250,7 +250,7 @@ def write_file(outfile, nodes, edges, groups, hide_legend=False,
     '''
     if as_json:
         content = generate_json(nodes, edges)
-        outfile.write(content)
+        #outfile.write(content)
         return
 
     splines = "polyline" if len(edges) >= 500 else "ortho"
@@ -269,7 +269,6 @@ def write_file(outfile, nodes, edges, groups, hide_legend=False,
         for group in groups:
             content += group.to_dot()
     content += '}\n'
-    print("This is the outfile!", outfile)
     # Write/Generate SVG File From GV File(outfile)
     html = GV_to_SVG_to_html(content, function_map)
     # outfile.write(html) not for server implementation
@@ -828,13 +827,13 @@ def code2flow(raw_source_paths, output_file, language=None, hide_legend=True,
 
     logging.info("Generating output file...")
     if isinstance(output_file, str):
-        with open(output_file, 'w') as fh:
-            as_json = output_ext == 'json'
-            html = write_file(fh, nodes=all_nodes, edges=edges,
-                       groups=file_groups, hide_legend=hide_legend,
-                       no_grouping=no_grouping, as_json=as_json, sources=sources, function_map=function_map)
+        #with open(output_file, 'w') as fh:
+        as_json = output_ext == 'json'
+        html = write_file(nodes=all_nodes, edges=edges,
+                    groups=file_groups, hide_legend=hide_legend,
+                    no_grouping=no_grouping, as_json=as_json, sources=sources, function_map=function_map)
     else:
-        html = write_file(output_file, nodes=all_nodes, edges=edges,
+        html = write_file(nodes=all_nodes, edges=edges,
                    groups=file_groups, hide_legend=hide_legend,
                    no_grouping=no_grouping, sources=sources, function_map=function_map)
 

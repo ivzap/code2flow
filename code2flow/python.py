@@ -241,7 +241,6 @@ class Python(BaseLanguage):
         """
         try:
             with open(filename) as f:
-                print("FILE_NAME:", filename)
                 raw = f.read()
         except ValueError:
             with open(filename, encoding='UTF-8') as f:
