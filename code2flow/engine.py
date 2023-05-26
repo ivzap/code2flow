@@ -272,7 +272,7 @@ def write_file(outfile, nodes, edges, groups, hide_legend=False,
     print("This is the outfile!", outfile)
     # Write/Generate SVG File From GV File(outfile)
     html = GV_to_SVG_to_html(content, function_map)
-    outfile.write(html)
+    # outfile.write(html) not for server implementation
     print("Html file generated successfully")
     return html
 
