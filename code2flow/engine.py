@@ -272,6 +272,10 @@ def write_file(outfile, nodes, edges, groups, hide_legend=False,
     print("This is the outfile!", outfile)
     # Write/Generate SVG File From GV File(outfile)
     trader_script = find_trader_script(groups)
+    if not trader_script:
+        print("Couldn't find trader script, empty html generated...")
+        # return empty html page
+        return '' 
     trader_script_path = sources 
     if isinstance(sources, list):
         for path in sources:
@@ -286,11 +290,14 @@ def find_trader_script(groups):
     # every group has a file token and class token. 
     # iterate over every files class to find trader file
     all_groups = flatten(g.all_groups() for g in groups)
+    if not len(all_groups):
+        # No groups were found 
+        return None 
     for i in range(1, len(all_groups), 1):
         if TRADER_SCRIPT_ID in all_groups[i].token and all_groups[i].group_type == "CLASS":
             if all_groups[i-1].group_type == "FILE":
                 return all_groups[i-1].token + ".py"
-    raise("Could not find traders script")
+    return None
 
 def GV_to_SVG_to_html(dot_content, function_map):
     # Execute the dot command

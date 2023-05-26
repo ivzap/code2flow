@@ -25,6 +25,9 @@
 	<head>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css">
         <!-- <link rel="stylesheet" href="css/graphviz.svg.css"> -->
+        <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/highlight.min.js"></script>
 	</head>
 
 	<style>
@@ -332,23 +335,30 @@
                             var lineToJump = parseInt(nodeData[0], 10);
                             var funcName = nodeData[1];
                             var newWindow = window.open('', '_blank');
-                            var data = this.textContent
+                            var data = this.getElementsByTagName('text');
+                            if (data.length == 2){
+                                data = data[1].textContent;
+                            }else{
+                                data = "Could not find function...";
+                            }
                             var lines = data.split('\n');
                             // Generate the HTML content with line numbers
                             var content = '';
                             for (var i = 0; i < lines.length; i++) {
-                                var lineNumber = i + 1;
-                                content += '<div style="' + (lineNumber === lineToJump ? 'background-color: yellow;' : '') + '"><span class="line-number">' + "<b>" + lineNumber + "</b>" + "    " + '</span>' + lines[i] + '</div>';
+                                var lineNumber = i+1;
+                                content += '<div style="' + (lineNumber === lineToJump ? 'background-color: yellow;' : '') + '"><span class="line-number">' + "    " + '</span>' + lines[i] + '</div>';
                             }
                             // Write content to new window
                             newWindow.document.open();
-                            newWindow.document.write('<pre>' + content + '</pre>');
+                            newWindow.document.write('<pre><code class="python">' + data + '</code></pre>');
                             newWindow.document.close()
-                                // Calculate the line height
+                            
+                            // Add the required import files for highlight.js
+
+                            // Calculate the line height
                             var lineHeight = calculateLineHeight(newWindow);
                             var scrollToPixel = Math.ceil(lineHeight * (lineToJump));
                             newWindow.scrollTo(0, scrollToPixel);
-
                         });
                         gv.nodes().click(function () {
                             var $set = $()
