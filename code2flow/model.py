@@ -163,7 +163,7 @@ class Variable():
         self.line_number = line_number
 
     def __repr__(self):
-        return f"<Variable token={self.token} points_to={repr(self.points_to)}"
+        return "<Variable token={} points_to={}".format(repr(self.points_to), self.to_string)
 
     def to_string(self):
         """
@@ -171,8 +171,8 @@ class Variable():
         :rtype: str
         """
         if self.points_to and isinstance(self.points_to, (Group, Node)):
-            return f'{self.token}->{self.points_to.token}'
-        return f'{self.token}->{self.points_to}'
+            return '{}->{}'.format(self.token, self.points_to.token)
+        return '{}->{}'.format(self.token, self.points_to)
 
 
 class Call():
@@ -191,7 +191,7 @@ class Call():
         self.definite_constructor = definite_constructor
 
     def __repr__(self):
-        return f"<Call owner_token={self.owner_token} token={self.token}>"
+        return "<Call owner_token={} token={}>".format(self.owner_token, self.token)
 
     def to_string(self):
         """
@@ -200,8 +200,8 @@ class Call():
         :rtype: str
         """
         if self.owner_token:
-            return f"{self.owner_token}.{self.token}()"
-        return f"{self.token}()"
+            return "{}.{}()".format(self.owner_token, self.token)
+        return "{}()".format(self.token)
 
     def is_attr(self):
         """
@@ -277,7 +277,7 @@ class Node():
         self.is_trunk = True  # nothing calls it
 
     def __repr__(self):
-        return f"<Node token={self.token} parent={self.parent}>"
+        return "<Node token={} parent={}>".format(self.token, self.parent)
 
     def __lt__(self, other):
             return self.name() < other.name()
@@ -287,7 +287,7 @@ class Node():
         Names exist largely for unit tests and deterministic node sorting
         :rtype: str
         """
-        return f"{self.first_group().filename()}::{self.token_with_ownership()}"
+        return "{}::{}".format(self.first_group().filename(),self.token_with_ownership())
 
     def first_group(self):
         """
@@ -345,8 +345,8 @@ class Node():
         :rtype: str
         """
         if self.line_number is not None:
-            return f"{self.line_number}: {self.token}()"
-        return f"{self.token}()"
+            return "{}: {}()".format(self.line_number, self.token)
+        return "{}()".format(self.token)
 
     def remove_from_parent(self):
         """
@@ -420,7 +420,7 @@ class Node():
 
         ret = self.uid + ' ['
         for k, v in attributes.items():
-            ret += f'{k}="{v}" '
+            ret += '{}="{}" '.format(k,v)
         ret += ']'
         return ret
 
@@ -458,7 +458,7 @@ class Edge():
         node1.is_trunk = False
 
     def __repr__(self):
-        return f"<Edge {self.node0} -> {self.node1}"
+        return "<Edge {} -> {}".format(self.node1, self.node0)
 
     def __lt__(self, other):
         if self.node0 == other.node0:
@@ -473,7 +473,7 @@ class Edge():
         '''
         ret = self.node0.uid + ' -> ' + self.node1.uid
         source_color = int(self.node0.uid.split("_")[-1], 16) % len(EDGE_COLORS)
-        ret += f' [color="{EDGE_COLORS[source_color]}" penwidth="2"]'
+        ret += ' [color="{}" penwidth="2"]'.format(EDGE_COLORS[source_color])
         return ret
 
     def to_dict(self):
@@ -508,7 +508,7 @@ class Group():
         self.uid = "cluster_" + os.urandom(4).hex()  # group doesn't work by syntax rules
 
     def __repr__(self):
-        return f"<Group token={self.token} type={self.display_type}>"
+        return "<Group token={} type={}>".format(self.token, self.display_type)
 
     def __lt__(self, other):
         return self.label() < other.label()
@@ -518,7 +518,7 @@ class Group():
         Labels are what you see on the graph
         :rtype: str
         """
-        return f"{self.display_type}: {self.token}"
+        return "{}: {}".format(self.display_type, self.token)
 
     def filename(self):
         """
@@ -641,7 +641,7 @@ class Group():
             'style': 'filled',
         }
         for k, v in attributes.items():
-            ret += f'    {k}="{v}";\n'
+            ret += '    {}="{}";\n'.format(k, v)
         ret += '    graph[style=dotted];\n'
         for subgroup in self.subgroups:
             ret += '    ' + ('\n'.join('    ' + ln for ln in

@@ -257,7 +257,7 @@ def write_file(nodes, edges, groups, hide_legend=False,
 
     content = "digraph G {\n"
     content += "concentrate=true;\n"
-    content += f'splines="{splines}";\n'
+    content += 'splines="{}";\n'.format(splines)
     content += 'rankdir="LR";\n'
     if not hide_legend:
         content += LEGEND
@@ -279,10 +279,10 @@ def GV_to_SVG_to_html(dot_content, function_map):
     # Execute the dot command
     # To-Do: Parse SVG and add metadata of function def to each node and its associated function
     graph_svg = graphviz.Source(dot_content)
-    if sys.platform == 'win32':
-        svg_content = graph_svg.pipe(format='svg').decode('cp1252')
-    else:
-        svg_content = graph_svg.pipe(format='svg').decode('utf-8')
+    # if sys.platform == 'win32':
+    #     svg_content = graph_svg.pipe(format='svg').decode('cp1252')
+    # else:
+    svg_content = graph_svg.pipe(format='svg', encoding='utf-8')#.decode('utf-8')
     svg_content = set_node_metadata(svg_content, function_map)
     with open(HTML_TEMPLATE, 'r') as file:
         html = file.read()
@@ -336,7 +336,7 @@ def determine_language(individual_files):
         if suffix in LANGUAGES:
             logging.info("Implicitly detected language as %r.", suffix)
             return suffix
-    raise AssertionError(f"Language could not be detected from input {individual_files}. ",
+    raise AssertionError("Language could not be detected from input {}. ".format(individual_files),
                          "Try explicitly passing the language flag.")
 
 
@@ -630,7 +630,7 @@ def map_it(sources, extension, no_trimming, exclude_namespaces, exclude_function
         file_name = file_group.filename()
         function_name = node.label().split(":")[1][0:-2].replace(' ', '') # remove empty chars and brackets '()'
         for source, file_ast_tree in file_ast_trees:
-            if f"{file_name}.{extension}" in source:
+            if "{}.{}".format(file_name,extension) in source:
                 code = ast_find_function(function_name, root=file_ast_tree)
                 function_map[node.uid] = code
     if not all_nodes:
@@ -683,8 +683,8 @@ def _limit_namespaces(file_groups, exclude_namespaces, include_only_namespaces):
 
     for namespace in exclude_namespaces:
         if namespace not in removed_namespaces:
-            logging.warning(f"Could not exclude namespace '{namespace}' "
-                             "because it was not found.")
+            logging.warning("Could not exclude namespace '{}' "
+                             "because it was not found.".format(namespace))
     return file_groups
 
 
@@ -709,8 +709,7 @@ def _limit_functions(file_groups, exclude_functions, include_only_functions):
 
     for function_name in exclude_functions:
         if function_name not in removed_functions:
-            logging.warning(f"Could not exclude function '{function_name}' "
-                             "because it was not found.")
+            logging.warning("Could not exclude function '{}' because it was not found.".format(function_name))
     return file_groups
 
 
@@ -865,7 +864,7 @@ def main(sys_argv=None):
         help='source code file/directory paths.')
     parser.add_argument(
         '--output', '-o', default='out.png',
-        help=f'output file path. Supported types are {VALID_EXTENSIONS}.')
+        help='output file path. Supported types are {}.'.format(VALID_EXTENSIONS))
     parser.add_argument(
         '--language', choices=['py', 'js', 'rb', 'php'],
         help='process this language and ignore all other files.'

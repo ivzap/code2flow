@@ -190,10 +190,10 @@ class EventStreamTracing:
                     is_from_class = self._func_from_class(function_name)
                     if is_from_class:
                         # Replace with class method call (self.function_name)
-                        function_call = ast.parse(f'self.{function_name}()').body[0].value
+                        function_call = ast.parse('self.{}()'.format(function_name)).body[0].value
                     elif function_name in self.functions:
                         # Replace with regular function call (function_name())
-                        function_call = ast.parse(f'{function_name}()').body[0].value
+                        function_call = ast.parse('{}()'.format(function_name)).body[0].value
                     node.values[node.values.index(value)] = function_call
         # Handle assigns, i.e dict[key] = 'function_name'
         if isinstance(node, ast.Assign):
@@ -203,10 +203,10 @@ class EventStreamTracing:
                 is_from_class = self._func_from_class(function_name)
                 if is_from_class:
                     # Replace with class method call (self.function_name)
-                    function_call = ast.parse(f'self.{function_name}()').body[0].value
+                    function_call = ast.parse('self.{}()'.format(function_name)).body[0].value
                 elif function_name in self.functions:
                     # Replace with regular function call (function_name())
-                    function_call = ast.parse(f'{function_name}()').body[0].value
+                    function_call = ast.parse('{}()'.format(function_name)).body[0].value
                 node.value = function_call
 
         for child_node in ast.iter_child_nodes(node):
