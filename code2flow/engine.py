@@ -279,15 +279,14 @@ def GV_to_SVG_to_html(dot_content, function_map):
     # Execute the dot command
     # To-Do: Parse SVG and add metadata of function def to each node and its associated function
     graph_svg = graphviz.Source(dot_content)
-    # if sys.platform == 'win32':
-    #     svg_content = graph_svg.pipe(format='svg').decode('cp1252')
-    # else:
-    svg_content = graph_svg.pipe(format='svg', encoding='utf-8')#.decode('utf-8')
+    try:
+        svg_content = graph_svg.pipe(format='svg').decode('utf-8')
+    except:
+        svg_content = graph_svg.pipe(format='svg').decode('cp1252')
     svg_content = set_node_metadata(svg_content, function_map)
     with open(HTML_TEMPLATE, 'r') as file:
         html = file.read()
         html = html.replace('{ SVG }', svg_content)
-        # replace { SCRIPT_PATH } with the path to trader script
     return html
 
 

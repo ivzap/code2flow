@@ -243,7 +243,7 @@ class Python(BaseLanguage):
             with open(filename) as f:
                 raw = f.read()
         except ValueError:
-            with open(filename, encoding='UTF-8') as f:
+            with open(filename, encoding='utf-8') as f:
                 raw = f.read()
         root = ast.parse(raw)
         timer_tracing = TimerTracing(root,trigger_name="add_time_trigger", timer_name="on_timer")
